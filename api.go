@@ -32,7 +32,7 @@ func Listen(network, address string, protocol Protocol, sendChanSize int, handle
 	if err != nil {
 		return nil, err
 	}
-	return NewServer(listener, protocol, sendChanSize, handler), nil
+	return newServer(listener, protocol, sendChanSize, handler), nil
 }
 
 func Dial(network, address string, protocol Protocol, sendChanSize int) (*Session, error) {

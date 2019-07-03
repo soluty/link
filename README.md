@@ -4,6 +4,9 @@
 [![codecov](https://codecov.io/gh/funny/link/branch/master/graph/badge.svg)](https://codecov.io/gh/funny/link)
 [![GoDoc](https://img.shields.io/badge/api-reference-blue.svg)](https://godoc.org/github.com/funny/link)
 
+为什么要fork一个网络库而不直接使用
+====
+原来的link没考虑如何进行单元测试，并且3年没用更新，所以自己fork了修改一些东西方便单元测试
 
 介绍
 ====

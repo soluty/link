@@ -22,9 +22,9 @@ func (f HandlerFunc) HandleSession(session *Session) {
 	f(session)
 }
 
-func NewServer(listener net.Listener, protocol Protocol, sendChanSize int, handler Handler) *Server {
+func newServer(listener net.Listener, protocol Protocol, sendChanSize int, handler Handler) *Server {
 	return &Server{
-		manager:      NewManager(),
+		manager:      newManager(),
 		listener:     listener,
 		protocol:     protocol,
 		handler:      handler,
