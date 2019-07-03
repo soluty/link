@@ -3,6 +3,7 @@ package link
 import (
 	"io"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -28,11 +29,26 @@ type ClearSendChan interface {
 }
 
 func Listen(network, address string, protocol Protocol, sendChanSize int, handler Handler) (*Server, error) {
+	if network == "test" {
+		count := addressToNum(address)
+		return newServer(),nil
+	}
 	listener, err := net.Listen(network, address)
 	if err != nil {
 		return nil, err
 	}
 	return newServer(listener, protocol, sendChanSize, handler), nil
+}
+
+func addressToNum(address string) int {
+	count := 1
+	i, err := strconv.Atoi(address)
+	if err == nil {
+		if i > 1 {
+			count = i
+		}
+	}
+	return count
 }
 
 func Dial(network, address string, protocol Protocol, sendChanSize int) (*Session, error) {
