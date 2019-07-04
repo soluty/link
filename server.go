@@ -71,6 +71,7 @@ func (server *Server) Stop() {
 		server.listener.Close()
 		server.manager.Dispose()
 	} else {
+		server.manager.Dispose()
 		delete(testServerMap, server.address)
 	}
 }

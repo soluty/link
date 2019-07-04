@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io"
 	"net"
-	"strconv"
 	"time"
 )
 
@@ -42,17 +41,6 @@ func Listen(network, address string, protocol Protocol, sendChanSize int, handle
 		return nil, err
 	}
 	return newServer(listener, address, protocol, sendChanSize, handler), nil
-}
-
-func addressToNum(address string) int {
-	count := 1
-	i, err := strconv.Atoi(address)
-	if err == nil {
-		if i > 1 {
-			count = i
-		}
-	}
-	return count
 }
 
 func Dial(network, address string, protocol Protocol, sendChanSize int) (*Session, error) {
