@@ -2,9 +2,12 @@ package link
 
 import "net"
 
+var testServerMap map[string]*Server = map[string]*Server{}
+
 type Server struct {
 	manager      *Manager
 	listener     net.Listener
+	address      string
 	protocol     Protocol
 	handler      Handler
 	sendChanSize int
@@ -22,11 +25,12 @@ func (f HandlerFunc) HandleSession(session *Session) {
 	f(session)
 }
 
-func newServer(listener net.Listener, protocol Protocol, sendChanSize int, handler Handler) *Server {
+func newServer(listener net.Listener, address string, protocol Protocol, sendChanSize int, handler Handler) *Server {
 	return &Server{
 		manager:      newManager(),
 		listener:     listener,
 		protocol:     protocol,
+		address:      address,
 		handler:      handler,
 		sendChanSize: sendChanSize,
 	}
@@ -37,8 +41,11 @@ func (server *Server) Listener() net.Listener {
 }
 
 func (server *Server) Serve() error {
+	if server.listener == nil {
+		return nil
+	}
 	for {
-		conn, err := Accept(server.listener)
+		conn, err := accept(server.listener)
 		if err != nil {
 			return err
 		}
@@ -60,6 +67,10 @@ func (server *Server) GetSession(sessionID uint64) *Session {
 }
 
 func (server *Server) Stop() {
-	server.listener.Close()
-	server.manager.Dispose()
+	if server.listener != nil {
+		server.listener.Close()
+		server.manager.Dispose()
+	} else {
+		delete(testServerMap, server.address)
+	}
 }
