@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"log"
 
 	"github.com/soluty/link"
@@ -20,12 +21,14 @@ func main() {
 	json.Register(AddReq{})
 	json.Register(AddRsp{})
 
-	server, err := link.Listen("tcp", "0.0.0.0:0", json, 0 /* sync send */, link.HandlerFunc(serverSessionLoop))
+	fix := codec.FixLen(json,2 , binary.LittleEndian, 1000,1000)
+
+	server, err := link.Listen("tcp", "0.0.0.0:0", fix, 0 /* sync send */, link.HandlerFunc(serverSessionLoop))
 	checkErr(err)
 	addr := server.Listener().Addr().String()
 	go server.Serve()
 
-	client, err := link.Dial("tcp", addr, json, 0)
+	client, err := link.Dial("tcp", addr, fix, 0)
 	checkErr(err)
 	clientSessionLoop(client)
 }
