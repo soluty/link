@@ -23,13 +23,13 @@ type protobufCodec struct {
 	closer io.Closer
 }
 
-func (p *ProtobufProtocol) NewCodec(rw io.ReadWriter) (link.Codec, error) {
+func (p *ProtobufProtocol) NewCodec(rw io.ReadWriteCloser) (link.Codec) {
 	codec := &protobufCodec{
 		p:  p,
 		rw: rw,
 	}
 	codec.closer, _ = rw.(io.Closer)
-	return codec, nil
+	return codec
 }
 
 func Protobuf() *ProtobufProtocol {

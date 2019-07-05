@@ -81,17 +81,13 @@ func FixLen(base link.Protocol, n int, byteOrder binary.ByteOrder, maxRecv, maxS
 	return proto
 }
 
-func (p *FixLenProtocol) NewCodec(rw io.ReadWriter) (cc link.Codec, err error) {
+func (p *FixLenProtocol) NewCodec(rw io.ReadWriteCloser) (cc link.Codec) {
 	codec := &fixlenCodec{
 		rw:             rw,
 		FixLenProtocol: p,
 	}
 	codec.headBuf = codec.head[:p.n]
-
-	codec.base, err = p.base.NewCodec(&codec.fixlenReadWriter)
-	if err != nil {
-		return
-	}
+	codec.base  = p.base.NewCodec(&codec.fixlenReadWriter)
 	cc = codec
 	return
 }
@@ -99,6 +95,10 @@ func (p *FixLenProtocol) NewCodec(rw io.ReadWriter) (cc link.Codec, err error) {
 type fixlenReadWriter struct {
 	recvBuf bytes.Reader
 	sendBuf bytes.Buffer
+}
+
+func (rw *fixlenReadWriter) Close() error {
+	return nil
 }
 
 func (rw *fixlenReadWriter) Read(p []byte) (int, error) {

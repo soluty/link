@@ -49,13 +49,8 @@ func (server *Server) Serve() error {
 		if err != nil {
 			return err
 		}
-
 		go func() {
-			codec, err := server.protocol.NewCodec(conn)
-			if err != nil {
-				conn.Close()
-				return
-			}
+			codec := server.protocol.NewCodec(conn)
 			session := server.manager.NewSession(codec, server.sendChanSize)
 			server.handler.HandleSession(session)
 		}()

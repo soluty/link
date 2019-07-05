@@ -8,12 +8,12 @@ import (
 )
 
 type Protocol interface {
-	NewCodec(rw io.ReadWriter) (Codec, error)
+	NewCodec(rw io.ReadWriteCloser) Codec
 }
 
-type ProtocolFunc func(rw io.ReadWriter) (Codec, error)
+type ProtocolFunc func(rw io.ReadWriteCloser) Codec
 
-func (pf ProtocolFunc) NewCodec(rw io.ReadWriter) (Codec, error) {
+func (pf ProtocolFunc) NewCodec(rw io.ReadWriteCloser) Codec {
 	return pf(rw)
 }
 
@@ -51,28 +51,18 @@ func Dial(network, address string, protocol Protocol, sendChanSize int) (*Sessio
 		}
 		serverConn, clientConn := net.Pipe()
 		go func() {
-			codec, err := server.protocol.NewCodec(serverConn)
-			if err != nil {
-				serverConn.Close()
-				return
-			}
+			codec := server.protocol.NewCodec(serverConn)
 			session := server.manager.NewSession(codec, server.sendChanSize)
 			server.handler.HandleSession(session)
 		}()
-		codec, err := protocol.NewCodec(clientConn)
-		if err != nil {
-			return nil, err
-		}
+		codec  := protocol.NewCodec(clientConn)
 		return NewSession(codec, sendChanSize), nil
 	}
 	conn, err := net.Dial(network, address)
 	if err != nil {
 		return nil, err
 	}
-	codec, err := protocol.NewCodec(conn)
-	if err != nil {
-		return nil, err
-	}
+	codec  := protocol.NewCodec(conn)
 	return NewSession(codec, sendChanSize), nil
 }
 
@@ -81,10 +71,7 @@ func DialTimeout(network, address string, timeout time.Duration, protocol Protoc
 	if err != nil {
 		return nil, err
 	}
-	codec, err := protocol.NewCodec(conn)
-	if err != nil {
-		return nil, err
-	}
+	codec  := protocol.NewCodec(conn)
 	return NewSession(codec, sendChanSize), nil
 }
 

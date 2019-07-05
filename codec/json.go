@@ -41,14 +41,14 @@ func (j *JsonProtocol) RegisterName(name string, t interface{}) {
 	j.names[rt] = name
 }
 
-func (j *JsonProtocol) NewCodec(rw io.ReadWriter) (link.Codec, error) {
+func (j *JsonProtocol) NewCodec(rw io.ReadWriteCloser) (link.Codec) {
 	codec := &jsonCodec{
 		p:       j,
 		encoder: json.NewEncoder(rw),
 		decoder: json.NewDecoder(rw),
 	}
 	codec.closer, _ = rw.(io.Closer)
-	return codec, nil
+	return codec
 }
 
 type jsonIn struct {
