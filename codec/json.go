@@ -8,6 +8,8 @@ import (
 	"github.com/soluty/link"
 )
 
+// {"head":"aaa","body":xxxx}
+
 type JsonProtocol struct {
 	types map[string]reflect.Type
 	names map[reflect.Type]string
