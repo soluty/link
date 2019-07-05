@@ -93,9 +93,18 @@ func (c *protobufCodec) Send(msg interface{}) error {
 		if err != nil {
 			return err
 		}
-		binary.Write(c.rw, c.p.order, uint16(len(bs)))
-		binary.Write(c.rw, c.p.order, cmd)
-		c.rw.Write(bs)
+		err = binary.Write(c.rw, c.p.order, uint16(len(bs)))
+		if err != nil {
+			return err
+		}
+		err = binary.Write(c.rw, c.p.order, cmd)
+		if err != nil {
+			return err
+		}
+		_, err = c.rw.Write(bs)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 }
