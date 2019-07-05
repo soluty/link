@@ -26,7 +26,7 @@ func (channel *Channel) Len() int {
 	return len(channel.sessions)
 }
 
-func (channel *Channel) Fetch(callback func(*Session)) {
+func (channel *Channel) ForEach(callback func(*Session)) {
 	channel.mutex.RLock()
 	defer channel.mutex.RUnlock()
 	for _, session := range channel.sessions {
@@ -68,13 +68,22 @@ func (channel *Channel) Remove(key KEY) bool {
 	return exists
 }
 
-func (channel *Channel) FetchAndRemove(callback func(*Session)) {
+func (channel *Channel) ForEachAndClear(callback func(*Session)) {
 	channel.mutex.Lock()
 	defer channel.mutex.Unlock()
 	for key, session := range channel.sessions {
 		session.RemoveCloseCallback(channel, key)
 		delete(channel.sessions, key)
 		callback(session)
+	}
+}
+
+func (channel *Channel) Clear() {
+	channel.mutex.Lock()
+	defer channel.mutex.Unlock()
+	for key, session := range channel.sessions {
+		session.RemoveCloseCallback(channel, key)
+		delete(channel.sessions, key)
 	}
 }
 
