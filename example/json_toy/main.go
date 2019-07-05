@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"io"
 	"log"
 
 	"github.com/soluty/link"
@@ -36,6 +37,9 @@ func main() {
 func serverSessionLoop(session *link.Session) {
 	for {
 		req, err := session.Receive()
+		if err == io.ErrClosedPipe {
+			return
+		}
 		checkErr(err)
 
 		err = session.Send(&AddRsp{

@@ -52,10 +52,16 @@ func (p *ProtobufProtocol) Register(cmd uint16, msg proto.Message) {
 
 func (c *protobufCodec) Receive() (interface{}, error) {
 	var lenBytes = make([]byte, 2)
-	c.rw.Read(lenBytes)
+	n, err := c.rw.Read(lenBytes)
+	if err != nil || n != 2 {
+		return nil, errors.New("read head error")
+	}
 	var cmdBytes = make([]byte, 2)
-	c.rw.Read(cmdBytes)
-	len := c.p.order.Uint16(lenBytes)
+	n, err = c.rw.Read(cmdBytes)
+	if err != nil || n != 2 {
+		return nil, errors.New("read head error")
+	}
+	length := c.p.order.Uint16(lenBytes)
 	cmd := c.p.order.Uint16(cmdBytes)
 	var body interface{}
 	if t, exists := c.p.types[cmd]; exists {
@@ -63,9 +69,12 @@ func (c *protobufCodec) Receive() (interface{}, error) {
 	} else {
 		return nil, nil
 	}
-	var pbBytes = make([]byte, len)
-	io.ReadFull(c.rw, pbBytes)
-	err := proto.Unmarshal(pbBytes, body.(proto.Message))
+	var pbBytes = make([]byte, length)
+	n, err = io.ReadFull(c.rw, pbBytes)
+	if err != nil || n != int(length) {
+		return nil, errors.New("read body error")
+	}
+	err = proto.Unmarshal(pbBytes, body.(proto.Message))
 	if err != nil {
 		return nil, err
 	}
@@ -94,4 +103,3 @@ func (c *protobufCodec) Send(msg interface{}) error {
 func (c *protobufCodec) Close() error {
 	return c.closer.Close()
 }
-
