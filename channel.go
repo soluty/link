@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-type KEY interface{}
+type KEY = interface{}
 
 type Channel struct {
 	mutex    sync.RWMutex
@@ -41,7 +41,7 @@ func (channel *Channel) Get(key KEY) *Session {
 	return session
 }
 
-func (channel *Channel) Put(key KEY, session *Session) {
+func (channel *Channel) Set(key KEY, session *Session) {
 	channel.mutex.Lock()
 	defer channel.mutex.Unlock()
 	if session, exists := channel.sessions[key]; exists {
